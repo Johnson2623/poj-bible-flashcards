@@ -525,7 +525,6 @@
         <div class="mini-btns">
           <button class="mini-btn active" id="dir-h2p" onclick="setDirection('h2p')">漢字 ➔ 白話字</button>
           <button class="mini-btn" id="dir-p2h" onclick="setDirection('p2h')">白話字 ➔ 漢字</button>
-          <button class="mini-btn" id="btn-unmastered" onclick="toggleUnmasteredOnly()">只看未熟記</button>
           <button class="mini-btn" onclick="shuffleDeck()">隨機洗牌</button>
           <span class="verse-tag" id="fc-verse">馬可福音 01:01</span>
         </div>
@@ -4421,7 +4420,6 @@ let currentSyl = 'all';           // 'all', 1, 2, 3, '48'
 let currentView = 'card';         // 'card', 'quiz', 'grid'
 let currentBookName = '馬可福音'; // '馬可福音', '羅馬書', '何西阿書'
 let direction = 'h2p';            // 'h2p' or 'p2h'
-let unmasteredOnly = false;
 let gridMask = 'none';
 
 let activeDeck = [];
@@ -4533,11 +4531,8 @@ function setViewMode(mode) {
   renderAll();
 }
 
-function getFilteredDeck(ignoreMastered = false) {
-  const currentDB = BOOK_DB_MAP[currentBookName] || BOOK_DB_MAP['馬可福音'];
-  const pool = currentDB.filter(item => {
-    return ignoreMastered || !unmasteredOnly || !masteredKeys.has(getKey(item));
-  });
+function getFilteredDeck() {
+  const pool = BOOK_DB_MAP[currentBookName] || BOOK_DB_MAP['馬可福音'];
 
   if (currentSyl === 'all') {
     return shuffleArray(pool);
@@ -4551,13 +4546,7 @@ function getFilteredDeck(ignoreMastered = false) {
 }
 
 function applyFilters() {
-  activeDeck = getFilteredDeck(false);
-
-  if (activeDeck.length === 0) {
-    unmasteredOnly = false;
-    document.getElementById('btn-unmastered').classList.remove('active');
-    activeDeck = getFilteredDeck(true);
-  }
+  activeDeck = getFilteredDeck();
 
   // 所有選項一律隨機洗牌並隨機選取起始題
   activeDeck = shuffleArray(activeDeck);
@@ -4584,12 +4573,6 @@ function setDirection(dir) {
   document.getElementById('dir-p2h').classList.toggle('active', dir === 'p2h');
   cardIdx = pickRandomNextIndex(cardIdx, activeDeck.length);
   renderFlashcard();
-}
-
-function toggleUnmasteredOnly() {
-  unmasteredOnly = !unmasteredOnly;
-  document.getElementById('btn-unmastered').classList.toggle('active', unmasteredOnly);
-  applyFilters();
 }
 
 function shuffleDeck() {
